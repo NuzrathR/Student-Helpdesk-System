@@ -1,0 +1,45 @@
+
+openapi: 3.0.1
+
+info:
+  title: StudentHelpdeskAPI
+  description: REST API for Student Helpdesk System
+  version: 1.0.0
+
+servers:
+  - url: https://localhost:8243/helpdesk/1.0.0
+
+paths:
+  /tickets:
+    post:
+      summary: Submit a student helpdesk ticket
+      operationId: submitTicket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentName:
+                  type: string
+                  example: "John"
+                issue:
+                  type: string
+                  example: "Login Problem"
+                description:
+                  type: string
+                  example: "Unable to log into student portal"
+              required:
+                - studentName
+                - issue
+                - description
+      responses:
+        '200':
+          description: Ticket submitted successfully
+        '201':
+          description: Ticket created successfully
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
