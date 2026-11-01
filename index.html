@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Helpdesk</title>
+</head>
+<body>
+  <h1>Student Helpdesk System</h1>
+  <p>Submit your IT support request below.</p>
+
+  <form id="ticketForm">
+    <label for="studentName">Student Name:</label><br>
+    <input id="studentName" name="studentName"
+           placeholder="Student name" required>
+    <br><br>
+
+    <label for="issue">Issue:</label><br>
+    <input id="issue" name="issue"
+           placeholder="Issue (e.g. Wi-Fi)" required>
+    <br><br>
+
+    <label for="description">Description:</label><br>
+    <textarea id="description" name="description"
+              placeholder="Describe your problem"
+              required></textarea>
+    <br><br>
+
+    <button id="submitButton" type="submit">
+      Submit Ticket
+    </button>
+  </form>
+
+  <p id="message" role="status"></p>
+
+  <script>
+    const API_URL =
+      "https://localhost:8243/helpdesk/1.0.0/tickets";
+
+    // Replace this placeholder with your valid WSO2 access token.
+    const ACCESS_TOKEN = "eyJ4NXQiOiJZMkUxWXpsaU5UUm1PV0kyWkRNNVpqTTVObUV4WVdGaE4yRTNPREEwT0RFek9UTmpNV1JtWW1JMU5qZGpabUZqWm1JNU5qSmxObUU0T0dGa05qVTRPQSIsImtpZCI6IlkyRTFZemxpTlRSbU9XSTJaRE01WmpNNU5tRXhZV0ZoTjJFM09EQTBPREV6T1ROak1XUm1ZbUkxTmpkalptRmpabUk1TmpKbE5tRTRPR0ZrTmpVNE9BX1JTMjU2IiwidHlwIjoiYXQrand0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJmZGQyMDRmZi02ODEzLTQ2OTAtOWE4ZS04Yjk2YzI2ZGU4YTIiLCJhdXQiOiJBUFBMSUNBVElPTiIsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwiZW50aXR5X2lkIjoiUVl6YVVpcFBxSkliRUV5a3RPWnBzM2VhaWJNYSIsImNsaWVudF9pZCI6IlFZemFVaXBQcUpJYkVFeWt0T1pwczNlYWliTWEiLCJ1c2lkIjoiYWQ2MGZkMTktYjk1NS00MDBiLTgxYmItMzk5YzYyMWYwYTQ1IiwiYXVkIjoiUVl6YVVpcFBxSkliRUV5a3RPWnBzM2VhaWJNYSIsIm5iZiI6MTc5MzQ1ODE0MCwiYXpwIjoiUVl6YVVpcFBxSkliRUV5a3RPWnBzM2VhaWJNYSIsInNjb3BlIjoiZGVmYXVsdCIsImV4cCI6MTc5MzQ2MTc0MCwiaWF0IjoxNzkzNDU4MTQwLCJqdGkiOiIxNzNkZTM0MC1kZDAyLTQ3NGItODViZS05YTIyYWQ2M2NhM2MifQ.afo6oobJfNm10-Dj9E5Wm8dOhWl2OATfSkraHATGw1Esn1_w_2kp7-4AprIvz755cM6qc_KHbjZC6RpQSzGmR-W1kQ9rHEYxEU-RydrnrUxZ_aqHNffvsoTkHESU_ILaFEvTyKHHl734b7lxwP_z-MHDZPGulbyz0BexkQI75kr4giIiFutQIbA7_95fiiC_IMEBx3wHhiaBswyFgtAnsJxp53jLNuoDELSLBKjOpzGy06oxNi735W_hBDIZ-BcyF9O5wdBuw_QKRn4whd3tAhm8Ifcy7loUKaxGZjvhTG42LAQeO3OcCWL2UnbyhGOim6-z0sOlyfsoRqF6uzlP7A";
+
+    const form = document.getElementById("ticketForm");
+    const message = document.getElementById("message");
+    const submitButton = document.getElementById("submitButton");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const ticket = {
+        studentName: document.getElementById("studentName").value.trim(),
+        issue: document.getElementById("issue").value.trim(),
+        description: document.getElementById("description").value.trim()
+      };
+
+      if (
+        !ticket.studentName ||
+        !ticket.issue ||
+        !ticket.description
+      ) {
+        message.textContent = "Please complete all fields.";
+        return;
+      }
+
+      if (
+        !ACCESS_TOKEN ||
+        ACCESS_TOKEN === "eyJ4NXQiOiJZMkUxWXpsaU5UUm1PV0kyWkRNNVpqTTVObUV4WVdGaE4yRTNPREEwT0RFek9UTmpNV1JtWW1JMU5qZGpabUZqWm1JNU5qSmxObUU0T0dGa05qVTRPQSIsImtpZCI6IlkyRTFZemxpTlRSbU9XSTJaRE01WmpNNU5tRXhZV0ZoTjJFM09EQTBPREV6T1ROak1XUm1ZbUkxTmpkalptRmpabUk1TmpKbE5tRTRPR0ZrTmpVNE9BX1JTMjU2IiwidHlwIjoiYXQrand0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJmZGQyMDRmZi02ODEzLTQ2OTAtOWE4ZS04Yjk2YzI2ZGU4YTIiLCJhdXQiOiJBUFBMSUNBVElPTiIsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwiZW50aXR5X2lkIjoiUVl6YVVpcFBxSkliRUV5a3RPWnBzM2VhaWJNYSIsImNsaWVudF9pZCI6IlFZemFVaXBQcUpJYkVFeWt0T1pwczNlYWliTWEiLCJ1c2lkIjoiYWQ2MGZkMTktYjk1NS00MDBiLTgxYmItMzk5YzYyMWYwYTQ1IiwiYXVkIjoiUVl6YVVpcFBxSkliRUV5a3RPWnBzM2VhaWJNYSIsIm5iZiI6MTc5MzQ1ODE0MCwiYXpwIjoiUVl6YVVpcFBxSkliRUV5a3RPWnBzM2VhaWJNYSIsInNjb3BlIjoiZGVmYXVsdCIsImV4cCI6MTc5MzQ2MTc0MCwiaWF0IjoxNzkzNDU4MTQwLCJqdGkiOiIxNzNkZTM0MC1kZDAyLTQ3NGItODViZS05YTIyYWQ2M2NhM2MifQ.afo6oobJfNm10-Dj9E5Wm8dOhWl2OATfSkraHATGw1Esn1_w_2kp7-4AprIvz755cM6qc_KHbjZC6RpQSzGmR-W1kQ9rHEYxEU-RydrnrUxZ_aqHNffvsoTkHESU_ILaFEvTyKHHl734b7lxwP_z-MHDZPGulbyz0BexkQI75kr4giIiFutQIbA7_95fiiC_IMEBx3wHhiaBswyFgtAnsJxp53jLNuoDELSLBKjOpzGy06oxNi735W_hBDIZ-BcyF9O5wdBuw_QKRn4whd3tAhm8Ifcy7loUKaxGZjvhTG42LAQeO3OcCWL2UnbyhGOim6-z0sOlyfsoRqF6uzlP7A"
+      ) {
+        message.textContent =
+          "Please add your valid WSO2 access token in the code.";
+        return;
+      }
+
+      submitButton.disabled = true;
+      message.textContent = "Submitting ticket...";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${ACCESS_TOKEN}`
+          },
+          body: JSON.stringify(ticket)
+        });
+
+        // Read the response safely, even if it is not JSON.
+        const responseText = await response.text();
+        let result = {};
+
+        try {
+          result = responseText ? JSON.parse(responseText) : {};
+        } catch {
+          result = {};
+        }
+
+        console.log("HTTP status:", response.status);
+        console.log("API response:", responseText);
+
+        if (!response.ok) {
+          throw new Error(
+            `HTTP ${response.status}: ${
+              result.message ||
+              result.error ||
+              responseText ||
+              "Request failed"
+            }`
+          );
+        }
+
+        const ticketId =
+          result.ticket?.id ?? result.id;
+
+        message.textContent = ticketId != null
+          ? `Ticket submitted successfully! ID: ${ticketId}`
+          : "Ticket submitted successfully!";
+
+        form.reset();
+
+      } catch (error) {
+        console.error("Ticket submission error:", error);
+
+        if (error instanceof TypeError) {
+          message.textContent =
+            "Could not connect to the API. Check the WSO2 gateway, " +
+            "HTTPS certificate, and CORS settings.";
+        } else {
+          message.textContent =
+            "Could not submit ticket: " + error.message;
+        }
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
